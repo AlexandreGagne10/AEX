@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any
 
-from fastapi import APIRouter, Body, Depends, Path, status
+from fastapi import APIRouter, Body, Depends, Path, Query, Response, status
 from fastapi.responses import JSONResponse
 
 from .errors import AEXError
@@ -17,6 +17,7 @@ from .models import (
     IngestResponse,
     JobRequest,
     JobResponse,
+    JobLeaseResponse,
 )
 from .repository import InMemoryRepository, repository
 
@@ -119,6 +120,30 @@ def post_job(
         status=job.status,
         priority=job.priority,
         schedule_at=job.schedule_at,
+    )
+
+
+@router.post(
+    "/jobs/next",
+    response_model=JobLeaseResponse,
+    responses={status.HTTP_204_NO_CONTENT: {"description": "Aucun job disponible"}},
+)
+def pull_next_job(
+    *,
+    job_type: str = Query(..., alias="type", min_length=1, max_length=64),
+    repo: InMemoryRepository = Depends(get_repository),
+) -> JobLeaseResponse | Response:
+    job = repo.lease_next_job(job_type=job_type)
+    if job is None:
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
+    return JobLeaseResponse(
+        job_id=job.job_id,
+        type=job.type,
+        payload=job.payload,
+        priority=job.priority,
+        schedule_at=job.schedule_at,
+        status=job.status,
+        leased_at=job.leased_at,
     )
 
 

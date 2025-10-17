@@ -73,3 +73,13 @@ class JobResponse(BaseModel):
     status: str
     priority: str
     schedule_at: Optional[datetime]
+
+
+class JobLeaseResponse(BaseModel):
+    job_id: str
+    type: str
+    payload: Dict[str, Any]
+    priority: str
+    schedule_at: Optional[datetime]
+    status: str
+    leased_at: datetime
