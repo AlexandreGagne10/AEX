@@ -16,6 +16,7 @@ Utilisez cette liste pour suivre l'avancement des travaux. Cochez les éléments
 - [x] Définir les modèles Pydantic et la validation pour les contrats REST décrits dans `docs/interface_specs.md`.
 - [x] Couvrir le service par des tests unitaires de base (FastAPI TestClient) et un script de lancement.
 - [x] Implémenter l'endpoint de récupération du prochain job pour les workers et gérer l'ordre de priorité.
+- [x] Ajouter un endpoint `GET /health` retournant l'état du service et l'horodatage courant.
 
 ## Notes
 - 2025-10-17 : Planification de la session afin de documenter modules, interfaces et pile technologique.
@@ -23,5 +24,6 @@ Utilisez cette liste pour suivre l'avancement des travaux. Cochez les éléments
 - 2025-10-18 : Préparation du développement initial du service FastAPI (contrats ingestion/configuration/jobs et tests).
 - 2025-10-18 : Implémentation du service FastAPI, configuration de l'exception handler et couverture de tests automatisés (`pytest`).
 - 2025-10-19 : Ajout d'un endpoint de leasing des jobs avec prise en compte de la priorité et des horaires de planification.
+- 2025-10-20 : Ajout d'un endpoint `GET /health` avec supervision de base et couverture de test dédiée.
 
 Mettez à jour ce fichier à chaque session de travail pour conserver une vue d'ensemble fiable.

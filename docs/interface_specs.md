@@ -10,6 +10,19 @@ Ce document précise les contrats d'échange entre modules du socle AEX. Les int
 
 ## Interfaces du noyau
 
+### Vérification de santé du service
+- **Endpoint** : `GET /health`
+- **Réponse** :
+  ```json
+  {
+    "status": "ok",
+    "service": "aex-core",
+    "timestamp": "2025-10-19T15:04:02Z"
+  }
+  ```
+- **Usage** : supervision basique, détection de disponibilité.
+- **Remarques** : horodatage exprimé en UTC ISO 8601.
+
 ### API d'ingestion des fichiers
 - **Endpoint** : `POST /ingest`
 - **Entrée** :
