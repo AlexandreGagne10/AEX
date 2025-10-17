@@ -37,7 +37,9 @@ class StoredJob:
     payload: Dict[str, Any]
     priority: str
     schedule_at: datetime | None
+    enqueued_at: datetime
     status: str = field(default="queued")
+    leased_at: datetime | None = None
 
 
 class InMemoryRepository:
@@ -93,8 +95,8 @@ class InMemoryRepository:
         priority: str,
         schedule_at: datetime | None,
     ) -> StoredJob:
+        now = datetime.now(tz=timezone.utc)
         if schedule_at is not None:
-            now = datetime.now(tz=timezone.utc)
             if schedule_at.tzinfo is None:
                 schedule_at = schedule_at.replace(tzinfo=timezone.utc)
             if schedule_at < now:
@@ -106,8 +108,36 @@ class InMemoryRepository:
                 payload=payload,
                 priority=priority,
                 schedule_at=schedule_at,
+                enqueued_at=now,
             )
             self._jobs[job.job_id] = job
+            return job
+
+    def lease_next_job(self, *, job_type: str) -> StoredJob | None:
+        """Retourne le prochain job prêt pour le type demandé."""
+
+        now = datetime.now(tz=timezone.utc)
+        priority_order = {"HIGH": 0, "NORMAL": 1, "LOW": 2}
+        with self._lock:
+            candidates = [
+                job
+                for job in self._jobs.values()
+                if job.type == job_type
+                and job.status == "queued"
+                and (job.schedule_at is None or job.schedule_at <= now)
+            ]
+            if not candidates:
+                return None
+            candidates.sort(
+                key=lambda job: (
+                    priority_order.get(job.priority, 1),
+                    job.schedule_at or job.enqueued_at,
+                    job.enqueued_at,
+                )
+            )
+            job = candidates[0]
+            job.status = "dispatched"
+            job.leased_at = now
             return job
 
 

@@ -15,6 +15,7 @@ def client() -> TestClient:
     app = create_app()
     repo = InMemoryRepository()
     app.dependency_overrides[get_repository] = lambda: repo
+    app.state.test_repo = repo
     return TestClient(app)
 
 
@@ -100,3 +101,55 @@ def test_enqueue_job_with_past_schedule_rejected(client: TestClient) -> None:
     )
     assert response.status_code == 422
     assert response.json()["error"]["code"] == "INVALID_SCHEDULE"
+
+
+def test_pull_next_job_returns_204_when_queue_empty(client: TestClient) -> None:
+    response = client.post("/jobs/next", params={"type": "embedding"})
+    assert response.status_code == 204
+
+
+def test_pull_next_job_respects_priority(client: TestClient) -> None:
+    low = client.post(
+        "/jobs",
+        json={
+            "type": "embedding",
+            "payload": {"image_id": "low"},
+            "priority": "LOW",
+        },
+    )
+    assert low.status_code == 201
+    high = client.post(
+        "/jobs",
+        json={
+            "type": "embedding",
+            "payload": {"image_id": "high"},
+            "priority": "HIGH",
+        },
+    )
+    assert high.status_code == 201
+    first = client.post("/jobs/next", params={"type": "embedding"})
+    assert first.status_code == 200
+    payload = first.json()
+    assert payload["job_id"] == high.json()["job_id"]
+    assert payload["payload"] == {"image_id": "high"}
+    assert payload["status"] == "dispatched"
+    second = client.post("/jobs/next", params={"type": "embedding"})
+    assert second.status_code == 200
+    assert second.json()["job_id"] == low.json()["job_id"]
+    final = client.post("/jobs/next", params={"type": "embedding"})
+    assert final.status_code == 204
+
+
+def test_pull_next_job_skips_future_schedule(client: TestClient) -> None:
+    schedule = datetime.now(tz=timezone.utc) + timedelta(minutes=10)
+    response = client.post(
+        "/jobs",
+        json={
+            "type": "embedding",
+            "payload": {"image_id": "future"},
+            "schedule_at": schedule.isoformat(),
+        },
+    )
+    assert response.status_code == 201
+    pull = client.post("/jobs/next", params={"type": "embedding"})
+    assert pull.status_code == 204
