@@ -1,0 +1,26 @@
+[project]
+name = "aex-service"
+version = "0.1.0"
+description = "Service FastAPI pour les interfaces noyau d'AEX"
+readme = "README.md"
+authors = [{ name = "AEX Contributors" }]
+requires-python = ">=3.10"
+dependencies = [
+  "fastapi>=0.110,<1.0",
+  "uvicorn[standard]>=0.27,<0.28"
+]
+
+[project.optional-dependencies]
+test = [
+  "pytest>=7.4,<8.0",
+  "httpx>=0.27,<0.28",
+  "pytest-asyncio>=0.23,<0.24"
+]
+
+[tool.pytest.ini_options]
+addopts = "-q"
+pythonpath = ["src"]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
