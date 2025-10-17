@@ -12,6 +12,8 @@ Utilisez cette liste pour suivre l'avancement des travaux. Cochez les éléments
 - [x] Cartographier les modules existants décrits dans `docs/architecture.md`.
 - [x] Définir les spécifications des interfaces entre modules.
 - [x] Établir la pile technologique de référence (langages, frameworks, outils CI/CD).
+- [x] Initialiser un squelette FastAPI pour le noyau AEX (ingestion d'images).
+- [x] Couvrir le squelette par des tests API (ingestion, consultation).
 
 ## Notes
 - 2025-10-17 : Planification de la session afin de documenter modules, interfaces et pile technologique.
