@@ -153,3 +153,12 @@ def test_pull_next_job_skips_future_schedule(client: TestClient) -> None:
     assert response.status_code == 201
     pull = client.post("/jobs/next", params={"type": "embedding"})
     assert pull.status_code == 204
+
+
+def test_health_endpoint_returns_ok(client: TestClient) -> None:
+    response = client.get("/health")
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["status"] == "ok"
+    assert payload["service"] == "aex-core"
+    datetime.fromisoformat(payload["timestamp"])

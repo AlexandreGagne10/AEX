@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 from fastapi import APIRouter, Body, Depends, Path, Query, Response, status
@@ -18,6 +18,7 @@ from .models import (
     JobRequest,
     JobResponse,
     JobLeaseResponse,
+    HealthResponse,
 )
 from .repository import InMemoryRepository, repository
 
@@ -26,6 +27,13 @@ router = APIRouter()
 
 def get_repository() -> InMemoryRepository:
     return repository
+
+
+@router.get("/health", response_model=HealthResponse)
+def read_health() -> HealthResponse:
+    """Expose un diagnostic léger pour la supervision."""
+
+    return HealthResponse(status="ok", service="aex-core", timestamp=datetime.now(tz=timezone.utc))
 
 
 @router.post(

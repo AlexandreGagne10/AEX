@@ -83,3 +83,9 @@ class JobLeaseResponse(BaseModel):
     schedule_at: Optional[datetime]
     status: str
     leased_at: datetime
+
+
+class HealthResponse(BaseModel):
+    status: str = Field(..., description="Statut global du service.")
+    service: str = Field(..., description="Identifiant court du service surveillé.")
+    timestamp: datetime = Field(..., description="Horodatage ISO 8601 de la génération de la réponse.")
